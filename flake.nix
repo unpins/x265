@@ -22,7 +22,29 @@
     ulib.mkStandaloneFlake {
       inherit self;
       name = "x265";
-      build         = pkgs: ulib.nativeFixes.x265 pkgs.pkgsStatic;
+      # The x265 CLI is C++. On darwin it otherwise links the system
+      # /usr/lib/libc++.1.dylib dynamically, which action-build's verify
+      # rejects (libc++ must be folded in statically). darwin clang ignores
+      # `-static-libstdc++`, so suppress the implicit dynamic `-lc++` with
+      # `-nostdlib++` and append the static libc++.a + libc++abi.a from
+      # pkgsStatic.libcxx (unwinding still comes from the system libunwind
+      # in libSystem). CMAKE_CXX_STANDARD_LIBRARIES lands them last on the
+      # link line, after the objects that reference them.
+      build = pkgs:
+        let
+          sp = pkgs.pkgsStatic;
+          base = ulib.nativeFixes.x265 sp;
+        in
+        if sp.stdenv.hostPlatform.isDarwin
+        then base.overrideAttrs (oa: {
+          preConfigure = (oa.preConfigure or "") + ''
+            cmakeFlagsArray+=(
+              "-DCMAKE_EXE_LINKER_FLAGS=-nostdlib++"
+              "-DCMAKE_CXX_STANDARD_LIBRARIES=${sp.libcxx}/lib/libc++.a ${sp.libcxx}/lib/libc++abi.a"
+            )
+          '';
+        })
+        else base;
       # mingw single-binary policy: by default x265.exe imports
       # libstdc++-6.dll + libgcc_s_seh-1.dll + libmcfgthread-2.dll.
       # Two layers conspire:
