@@ -44,6 +44,11 @@ The first invocation will offer to add the [unpins.cachix.org](https://unpins.ca
 
 The [Releases](https://github.com/unpins/x265/releases) page has standalone binaries for manual download.
 
+## Man pages
+
+x265 ships no man page upstream — run `x265 --help` (or `x265 --fullhelp` /
+`x265 --log-level full --help`) for the full option reference.
+
 ## Build notes
 
 - **Multi bit-depth in one binary** — 8-bit + Main10/HDR10 + Main12 (Linux x86_64 / Windows / macOS). aarch64-linux is 8-bit only (nixpkgs disables multi bit-depth there).
