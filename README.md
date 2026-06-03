@@ -11,18 +11,18 @@ Part of the [unpins](https://unpins.org) project — native single-binary builds
 
 Encodes Y4M / YUV input to a raw HEVC bitstream (`.hevc`) or a Matroska / MP4-ready elementary stream. Includes 8-bit, Main10 (HDR10), and Main12 depth support in a single binary.
 
-## Installation
+## Usage
 
-Install with [unpin](https://github.com/unpins/unpin):
+Run the `x265` program with [unpin](https://github.com/unpins/unpin):
 
 ```bash
-unpin x265
+unpin x265 --input in.y4m --output out.hevc
 ```
 
-Or run without installing:
+To install it onto your PATH:
 
 ```bash
-unpin run x265
+unpin install x265
 ```
 
 ## Build locally
