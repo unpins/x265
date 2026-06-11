@@ -1,5 +1,5 @@
 {
-  description = "Standalone build of x265 (H.265/HEVC encoder CLI)";
+  description = "x265 (HEVC / H.265 video encoder) as a single self-contained binary";
 
   nixConfig = {
     extra-substituters = [ "https://unpins.cachix.org" ];
