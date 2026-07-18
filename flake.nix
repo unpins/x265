@@ -22,6 +22,15 @@
     ulib.mkStandaloneFlake {
       inherit self;
       name = "x265";
+      # Build via the unpin-llvm engine + emit a bitcode multicall module. Single
+      # binary (`x265`), self-folds N=1 from its own module.bc. C++ CLI over the
+      # x265 asm kernels (SIMD → native sidecar); requires.cxx pulls libc++.
+      # Windows stays the mingw path below.
+      engine = "unpin-llvm";
+      multicall = {
+        programs = [{ name = "x265"; }];
+        requires.cxx = true;
+      };
       # The x265 CLI is C++. On darwin it otherwise links the system
       # /usr/lib/libc++.1.dylib dynamically, which action-build's verify
       # rejects (libc++ must be folded in statically). darwin clang ignores
