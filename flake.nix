@@ -22,6 +22,8 @@
     ulib.mkStandaloneFlake {
       inherit self;
       name = "x265";
+      smoke = [ "--version" ];
+      smokePattern = "HEVC encoder version [0-9]+\\.[0-9]+";
       # Build via the unpin-llvm engine + emit a bitcode multicall module. Single
       # binary (`x265`), self-folds N=1 from its own module.bc. C++ CLI over the
       # x265 asm kernels (SIMD → native sidecar); requires.cxx pulls libc++.
