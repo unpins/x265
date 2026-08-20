@@ -54,5 +54,6 @@ The [Releases](https://github.com/unpins/x265/releases) page has standalone bina
 - **Multi bit-depth in one binary** — 8-bit + Main10/HDR10 + Main12 (Linux x86_64 / Windows / macOS). aarch64-linux is 8-bit only (nixpkgs disables multi bit-depth there).
 - **Windows:** `mingw` cross, single `.exe`, no companion DLLs.
 - **No upstream features disabled** on any platform.
+- **No man page.** x265 ships none upstream (nixpkgs' x265 has no `man` output), so there is nothing to embed — `unpin man x265` has no page to show. `x265 --help` documents the options.
 
 Platform fixes live in [`nix-lib/native-overlay/x265.nix`](https://github.com/unpins/nix-lib/blob/main/native-overlay/x265.nix).
