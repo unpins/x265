@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Encoding works again on Linux. Every Linux build since the toolchain change
+  crashed the moment it started encoding and wrote an empty file; only
+  `--version` still worked, so nothing caught it. No release shipped with this.
+  Encoded files now match the previous release's byte for byte.
+
 ### Changed
 
 - The Windows binary is now built by the same compiler as the Linux and macOS

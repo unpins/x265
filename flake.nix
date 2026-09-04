@@ -56,7 +56,19 @@
             )
           '';
         })
-        else base;
+        else base.overrideAttrs (oa: {
+          # musl gives a thread 128 KB of stack. x265 runs the whole encode on
+          # worker threads, and its analysis recursion needs ~192 KB when clang
+          # lays out the frames (gcc fit under the limit, which is why this only
+          # surfaced on the engine): every encode segfaulted in a frame worker,
+          # while `--version` — the smoke — returned 0. musl takes the default
+          # thread stack from PT_GNU_STACK, so ask the linker for 2 MB, ten
+          # times the measured need. Costs address space, not memory: the pages
+          # are only ever backed on touch.
+          preConfigure = (oa.preConfigure or "") + ''
+            cmakeFlagsArray+=("-DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,stack-size=2097152")
+          '';
+        });
       # The `.exe` comes off the engine (clang/lld + libc++, static-only),
       # so the mingw-gcc runtime DLLs this used to fight (libstdc++-6,
       # libgcc_s_seh-1, libmcfgthread-2) have no way in — no link flags
