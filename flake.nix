@@ -27,9 +27,10 @@
       # Build via the unpin-llvm engine + emit a bitcode multicall module. Single
       # binary (`x265`), self-folds N=1 from its own module.bc. C++ CLI over the
       # x265 asm kernels (SIMD → native sidecar); requires.cxx pulls libc++.
-      # Windows stays the mingw path below.
       engine = "unpin-llvm";
       multicall = {
+        # The `.exe` on the engine too, not the nixpkgs mingw-gcc cross.
+        windows = true;
         programs = [{ name = "x265"; }];
         requires.cxx = true;
       };
@@ -56,41 +57,10 @@
           '';
         })
         else base;
-      # mingw single-binary policy: by default x265.exe imports
-      # libstdc++-6.dll + libgcc_s_seh-1.dll + libmcfgthread-2.dll.
-      # Two layers conspire:
-      #
-      # (a) `-static -static-libgcc -static-libstdc++` on the link
-      #     would normally fold all three in. They must go through
-      #     `cmakeFlagsArray` (not `cmakeFlags`): nixpkgs joins
-      #     `cmakeFlags` with spaces and bash word-splits them, so the
-      #     spaces inside our `-D…=…` would shatter the value; the
-      #     array form preserves it.
-      #
-      # (b) nixpkgs' multibitdepth recipe emits the 10/12-bit siblings
-      #     wrapped as `-Wl,-Bstatic -lx265-10 -lx265-12 -Wl,-Bdynamic`
-      #     into the cli link's `linkLibs.rsp`. That trailing
-      #     `-Bdynamic` leaves the linker in dynamic mode, and the g++
-      #     driver appends the C++ runtime (`-lstdc++ …`) *after* the
-      #     rsp — so it resolves against the `.dll.a` import libs,
-      #     defeating (a). `CMAKE_CXX_STANDARD_LIBRARIES=-Wl,-Bstatic`
-      #     is appended right after the rsp (before the driver's
-      #     implicit libs), flipping the linker back to static so the
-      #     runtime resolves to `.a`. System DLLs (KERNEL32/SHELL32/…)
-      #     are import stubs and link fine under -Bstatic.
-      #
-      # Result: single `.exe`, imports only KERNEL32 + msvcrt + ntdll
-      # + SHELL32. CLI-only concern (ffmpeg's C link never pulls
-      # libstdc++); doesn't belong in nix-lib's library overlay.
-      windowsBuild  = pkgs:
-        let cross = ulib.mingwStaticCross pkgs; in
-        (ulib.nativeFixes.x265 cross).overrideAttrs (oa: {
-          preConfigure = (oa.preConfigure or "") + ''
-            cmakeFlagsArray+=(
-              "-DCMAKE_EXE_LINKER_FLAGS=-static -static-libgcc -static-libstdc++"
-              "-DCMAKE_CXX_STANDARD_LIBRARIES=-Wl,-Bstatic"
-            )
-          '';
-        });
+      # The `.exe` comes off the engine (clang/lld + libc++, static-only),
+      # so the mingw-gcc runtime DLLs this used to fight (libstdc++-6,
+      # libgcc_s_seh-1, libmcfgthread-2) have no way in — no link flags
+      # needed beyond the cross itself.
+      windowsBuild = pkgs: ulib.nativeFixes.x265 (ulib.mingwStaticCross pkgs);
     };
 }
