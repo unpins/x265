@@ -4,10 +4,16 @@
 
 ### Fixed
 
+- 10- and 12-bit encoding works on Linux. Every released Linux binary that
+  offers those depths (x86_64, aarch64, ppc64le and riscv64) crashed on any 10-
+  or 12-bit encode and wrote an empty file; 8-bit encoding, and the macOS and
+  Windows binaries, were fine. The encoder's threads now get a stack large
+  enough for them.
+
 - Encoding works again on Linux. Every Linux build since the toolchain change
   crashed the moment it started encoding and wrote an empty file; only
   `--version` still worked, so nothing caught it. No release shipped with this.
-  Encoded files now match the previous release's byte for byte.
+  8-bit encoded files now match the previous release's byte for byte.
 
 ### Changed
 

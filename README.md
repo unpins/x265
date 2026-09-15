@@ -9,7 +9,7 @@
 
 Part of the [unpins](https://unpins.org) catalog; install it with [`unpin`](https://github.com/unpins/unpin): `unpin install x265`.
 
-Encodes Y4M / YUV input to a raw HEVC bitstream (`.hevc`) or a Matroska / MP4-ready elementary stream. Includes 8-bit, Main10 (HDR10), and Main12 depth support in a single binary.
+It reads Y4M or raw YUV video and writes a raw HEVC stream (`.hevc`), in 8-bit, 10-bit (Main10, used for HDR10) or 12-bit depth.
 
 ## Usage
 
@@ -17,6 +17,7 @@ Run the `x265` program with [unpin](https://github.com/unpins/unpin):
 
 ```bash
 unpin x265 --input in.y4m --output out.hevc
+unpin x265 --input in.y4m --output-depth 10 --crf 22 --output out.hevc
 ```
 
 To install it onto your PATH:
@@ -24,11 +25,6 @@ To install it onto your PATH:
 ```bash
 unpin install x265
 ```
-
-## Man pages
-
-x265 ships no man page upstream — run `x265 --help` (or `x265 --fullhelp` /
-`x265 --log-level full --help`) for the full option reference.
 
 ## Build locally
 
@@ -51,9 +47,10 @@ The [Releases](https://github.com/unpins/x265/releases) page has standalone bina
 
 ## Build notes
 
-- **Multi bit-depth in one binary** — 8-bit + Main10/HDR10 + Main12 (Linux x86_64 / Windows / macOS). aarch64-linux is 8-bit only (nixpkgs disables multi bit-depth there).
-- **Windows:** `mingw` cross, single `.exe`, no companion DLLs.
+- **Bit depths:** 8-, 10- and 12-bit on Linux x86_64, aarch64, ppc64le and
+  riscv64, macOS and Windows. The 32-bit Linux binaries (i686, armv7l) are 8-bit
+  only, as in nixpkgs; asked for a higher depth, they print "falling back to
+  default bit-depth" and encode 8-bit.
+- **Windows:** a single `.exe`, no companion DLLs.
 - **No upstream features disabled** on any platform.
-- **No man page.** x265 ships none upstream (nixpkgs' x265 has no `man` output), so there is nothing to embed — `unpin man x265` has no page to show. `x265 --help` documents the options.
-
-Platform fixes live in [`nix-lib/native-overlay/x265.nix`](https://github.com/unpins/nix-lib/blob/main/native-overlay/x265.nix).
+- **No man pages** — x265 ships none; run `x265 --help` or `x265 --fullhelp`.
