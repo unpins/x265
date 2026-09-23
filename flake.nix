@@ -79,14 +79,10 @@
         programs = [{ name = "x265"; }];
         requires.cxx = true;
       };
-      # The x265 CLI is C++. On darwin it otherwise links the system
-      # /usr/lib/libc++.1.dylib dynamically, which action-build's verify
-      # rejects (libc++ must be folded in statically). darwin clang ignores
-      # `-static-libstdc++`, so suppress the implicit dynamic `-lc++` with
-      # `-nostdlib++` and append the static libc++.a + libc++abi.a from
-      # pkgsStatic.libcxx (unwinding still comes from the system libunwind
-      # in libSystem). CMAKE_CXX_STANDARD_LIBRARIES lands them last on the
-      # link line, after the objects that reference them.
+      # The x265 CLI is C++. darwin needs no libc++ fold here: the engine's
+      # clang++ links its own static libc++, so the binary keeps to libSystem
+      # on its own. action-build's darwin verify fails the build if the
+      # dynamic /usr/lib/libc++.1.dylib ever comes back.
       build = pkgs: withRoundTrip pkgs (
         let
           # i686 only: without LTO. The engine's full LTO miscompiles x265 on
@@ -119,15 +115,13 @@
             else pkgs.pkgsStatic;
           base = ulib.nativeFixes.x265 sp;
         in
+        # darwin used to force `-nostdlib++` plus nixpkgs' libc++.a/libc++abi.a
+        # here. `libcxx` is excluded from the engine's stdenv swap, so that
+        # pairs a non-engine archive with objects clang++ compiled against the
+        # libc++ headers in its own sysroot; leaving the default in place lets
+        # the engine link the matching one, statically.
         if sp.stdenv.hostPlatform.isDarwin
-        then base.overrideAttrs (oa: {
-          preConfigure = (oa.preConfigure or "") + ''
-            cmakeFlagsArray+=(
-              "-DCMAKE_EXE_LINKER_FLAGS=-nostdlib++"
-              "-DCMAKE_CXX_STANDARD_LIBRARIES=${sp.libcxx}/lib/libc++.a ${sp.libcxx}/lib/libc++abi.a"
-            )
-          '';
-        })
+        then base
         else base.overrideAttrs (oa: {
           # musl gives a thread 128 KB of stack. x265 runs the whole encode on
           # worker threads, and its analysis recursion needs ~192 KB when clang
