@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [4.1-2] - 2026-09-26
+
 ### Fixed
 
 - 10- and 12-bit encoding works on Linux. Every released Linux binary that
