@@ -51,6 +51,6 @@ The [Releases](https://github.com/unpins/x265/releases) page has standalone bina
   riscv64, macOS and Windows. The 32-bit Linux binaries (i686, armv7l) are 8-bit
   only, as in nixpkgs; asked for a higher depth, they print "falling back to
   default bit-depth" and encode 8-bit.
-- **Windows:** a single `.exe`, no companion DLLs.
+- **Windows:** built with mingw-w64.
 - **No upstream features disabled** on any platform.
 - **No man pages** — x265 ships none; run `x265 --help` or `x265 --fullhelp`.
