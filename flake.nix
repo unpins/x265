@@ -101,9 +101,7 @@
                   captureLinks = true;
                 };
               }).overrideAttrs (o: {
-                postPatch = (o.postPatch or "") + ''
-                  echo 'set_source_files_properties(x265.cpp PROPERTIES COMPILE_OPTIONS -flto)' >> CMakeLists.txt
-                '';
+                patches = (o.patches or [ ]) ++ [ ./patches/i686-main-lto.patch ];
               });
             })
             else pkgs.pkgsStatic;

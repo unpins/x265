@@ -1,0 +1,15 @@
+CMakeLists.txt: keep LTO for x265.cpp in the i686 build.
+
+The i686 build compiles x265 without LTO (the engine's full LTO miscompiles its
+floating-point option parsing on 32-bit x86). The file holding `main` still
+needs -flto: the single-binary fold takes the program's entry point from the
+LTO module, and with every object native it finds none. x265.cpp parses no
+options itself. Applied to the i686 build only.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1029,3 +1029,4 @@
+         set(PLATFORM_LIBS ${PLATFORM_LIBS} PARENT_SCOPE)
+     endif(PLATFORM_LIBS)
+ endif(hasParent)
++set_source_files_properties(x265.cpp PROPERTIES COMPILE_OPTIONS -flto)
