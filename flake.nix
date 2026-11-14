@@ -8,15 +8,9 @@
 
   inputs.unpins-lib.url = "github:unpins/nix-lib";
 
-  # Single CLI upstream (`x265`). Shared `nativeFixes.x265` covers:
-  # (1) merge libx265.a + libx265-10.a + libx265-12.a into a unified
-  #     archive (multibitdepth = HDR10 + Main12), since pkgsStatic
-  #     doesn't auto-merge the way the .so build does;
-  # (2) clear upstream's `postInstall` that nukes static archives;
-  # (3) (mingw) rewrite `x265.pc Libs.private` to the static-libgcc
-  #     form so consumer `.exe`s don't end up importing
-  #     `libgcc_s_seh-1.dll`.
-  # See nix-lib/native-overlay/x265.nix.
+  # Single CLI upstream (`x265`). The shared fixes (multi-bit-depth archive,
+  # the static archives upstream's postInstall removes, …) live in
+  # nix-lib/native-overlay/x265.nix (`nativeFixes.x265`).
   outputs = { self, unpins-lib }:
     let
       ulib = unpins-lib.lib;
@@ -130,7 +124,9 @@
           # while `--version` — the smoke — returned 0. musl takes the default
           # thread stack from PT_GNU_STACK, so ask the linker for 2 MB, ten
           # times the measured need. Costs address space, not memory: the pages
-          # are only ever backed on touch.
+          # are only ever backed on touch. The shipped binary gets 8 MB from
+          # nix-lib's embed wrap anyway; this flag is what lets the installCheck
+          # encode run inside the build, before that wrap.
           preConfigure = (oa.preConfigure or "") + ''
             cmakeFlagsArray+=("-DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,stack-size=2097152")
           '';
