@@ -51,6 +51,12 @@ The [Releases](https://github.com/unpins/x265/releases) page has standalone bina
   riscv64, macOS and Windows. The 32-bit Linux binaries (i686, armv7l) are 8-bit
   only, as in nixpkgs; asked for a higher depth, they print "falling back to
   default bit-depth" and encode 8-bit.
+- **NUMA:** on Linux x86_64, i686 and aarch64 — the platforms where nixpkgs
+  builds x265 with it — x265 spreads its thread pools across NUMA nodes. Where
+  the node information cannot be read (a container without
+  `/sys/devices/system/node`, or one whose seccomp profile blocks
+  `get_mempolicy`), it uses all CPUs as a single pool, as a build without NUMA
+  does.
 - **Windows:** built with mingw-w64.
 - **No upstream features disabled** on any platform.
 - **No man pages** — x265 ships none; run `x265 --help` or `x265 --fullhelp`.
