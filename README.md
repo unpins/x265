@@ -58,5 +58,4 @@ The [Releases](https://github.com/unpins/x265/releases) page has standalone bina
   `get_mempolicy`), it uses all CPUs as a single pool, as a build without NUMA
   does.
 - **Windows:** built with mingw-w64.
-- **No upstream features disabled** on any platform.
 - **No man pages** — x265 ships none; run `x265 --help` or `x265 --fullhelp`.
